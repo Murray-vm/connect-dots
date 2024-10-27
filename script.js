@@ -38,15 +38,33 @@ function areLinesEqual(lines1, lines2) {
     return false;
   }
 
-  return lines1.every((line, index) => {
-    const targetLine = lines2[index];
-    return (
-      line.start.x === targetLine.start.x &&
-      line.start.y === targetLine.start.y &&
-      line.end.x === targetLine.end.x &&
-      line.end.y === targetLine.end.y
-    );
-  });
+  // Helper function to convert a line into a standardized string for comparison
+  function lineToString(line) {
+    const { start, end } = line;
+    // Create a string representation that sorts the coordinates to handle reversed lines
+    const sortedLine = [
+      { x: Math.min(start.x, end.x), y: Math.min(start.y, end.y) },
+      { x: Math.max(start.x, end.x), y: Math.max(start.y, end.y) },
+    ];
+    return JSON.stringify(sortedLine);
+  }
+
+  // Create sets of line strings for both arrays
+  const lineSet1 = new Set(lines1.map(lineToString));
+  const lineSet2 = new Set(lines2.map(lineToString));
+
+  // Compare the sets
+  if (lineSet1.size !== lineSet2.size) {
+    return false;
+  }
+
+  for (let line of lineSet1) {
+    if (!lineSet2.has(line)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 // Create grid of dots
